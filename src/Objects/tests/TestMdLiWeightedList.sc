@@ -48,4 +48,40 @@ TestMdLiWeightedList : TestMdLi {
 		this.assertEquals(keys[1], \b, "Key b is second.");
 		this.assertEquals(keys[2], \c, "Key c is third.");
 	}
+
+	test_do {
+		var l = list.weightedCollect {
+			arg key, value, index;
+			value.put(\order, index);
+			(value.id() ++ \Meow).asSymbol;
+		};
+		this.assertEquals(l[0], \aMeow, "A's symbol was altered and collected");
+		this.assertEquals(l[1], \bMeow, "B's symbol was altered and collected");
+		this.assertEquals(l[2], \cMeow, "C's symbol was altered and collected");
+		this.assertEquals(list[\a][\order], 0, "A's object was also altered");
+		this.assertEquals(list[\b][\order], 1, "A's object was also altered");
+		this.assertEquals(list[\c][\order], 2, "A's object was also altered");
+	}
+
+	test_weightedKeysCollect {
+		var l = list.weightedKeysCollect {
+			arg key, value, index;
+			value.put(\order, index);
+			(value.id() ++ \Meow).asSymbol;
+		};
+		this.assertEquals(l[\a], \aMeow, "A's symbol was altered and collected");
+		this.assertEquals(l[\b], \bMeow, "B's symbol was altered and collected");
+		this.assertEquals(l[\c], \cMeow, "C's symbol was altered and collected");
+	}
+
+	test_weightedGetProperty {
+		var l;
+		list[\b][\sound] = \arf;
+		list[\a][\sound] = \woof;
+		list[\c][\sound] = \ruff;
+		l = list.weightedGetProperty(\sound);
+		this.assertEquals(l[0], \woof, "Properties are sorted correctly");
+		this.assertEquals(l[1], \arf, "Properties are sorted correctly");
+		this.assertEquals(l[2], \ruff, "Properties are sorted correctly");
+	}
 }

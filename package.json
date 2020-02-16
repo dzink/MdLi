@@ -14,9 +14,9 @@
   "author": "",
   "license": "ISC",
   "nodemonConfig": {
-    "watch": "src",
+    "watch": ".",
     "exec": "sclang  -D src/tests/test.sc.nocompile",
-    "ext": "sc",
+    "ext": "sc,yaml",
     "ignore": [
       ".git/*"
     ]

@@ -1,0 +1,23 @@
+a: 1.5
+b: 2
+c: 3e0
+array:
+  - 4
+  - 5
+  - 6
+  - a
+  - b
+  - 4
+  - 5
+  - 6
+  - a
+  - b
+  - 4
+  - 5
+  - 6
+  - a
+  - \nil
+parent:
+  c1: seven
+  c2: eight
+  c3: nine

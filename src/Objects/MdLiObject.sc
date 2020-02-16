@@ -1,34 +1,36 @@
-MdLiObject : IdentityDictionary {
+MdLiObject : Dictionary {
 	classvar <> strict = true;
+
 	var < ancestor;
 	var id;
+
 	var errorHandler;
 	var logger;
 	var config;
 
-	/**
-	 * Allows Event style pseudomethods.
-	 */
-	doesNotUnderstand {
-		arg key, value;
-		if (strict) {
-			this.errorHandler().throw(DoesNotUnderstandError.new("Strict Error: " ++ key));
-		};
-		key = key.asString();
-		if (key.endsWith("_")) {
-			key = key.keep(key.size - 1);
-			this.[key.asSymbol] = value;
-			^ this;
-		} {
-			key = key;
-			value = this.at(key.asSymbol);
-			^ value;
-		};
-	}
+	// /**
+	//  * Allows Event style pseudomethods.
+	//  */
+	// doesNotUnderstand {
+	// 	arg key, value;
+	// 	if (strict) {
+	// 		this.errorHandler().throw(DoesNotUnderstandError.new("Strict Error: " ++ key));
+	// 	};
+	// 	key = key.asString();
+	// 	if (key.endsWith("_")) {
+	// 		key = key.keep(key.size - 1);
+	// 		this.[key.asSymbol] = value;
+	// 		^ this;
+	// 	} {
+	// 		key = key;
+	// 		value = this.at(key.asSymbol);
+	// 		^ value;
+	// 	};
+	// }
 
 	hasKey {
 		arg key;
-		^ this.at(key).isNil.not;
+		^ this.at(key).isKindOf(Nil).not;
 	}
 
 	/**
@@ -84,7 +86,7 @@ MdLiObject : IdentityDictionary {
 
 
 	errorHandler {
-		if (errorHandler.isNil) {
+		if (errorHandler.isKindOf(Nil)) {
 			var func = { MdLiErrorHandler() };
 			errorHandler = this.bubbleDefaultProperty(\errorHandler, func);
 		}
@@ -114,12 +116,13 @@ MdLiObject : IdentityDictionary {
 	bubbleDefaultProperty {
 		arg key, func, levels = inf;
 		var bubble = this.bubbleProperty(key, levels);
-		if (bubble.isNil.not) {
+		if (bubble.isKindOf(Nil).not) {
 			^ bubble;
 		} {
 			var a = this.ancestors(levels);
 			var object = func.value(this, a);
 			a.attach(key, object);
+			this.attach(key, object);
 			^ object;
 		};
 	}
@@ -152,6 +155,19 @@ MdLiObject : IdentityDictionary {
 			^ this.at(key);
 		};
 		^ this.ancestorProperty(key, levels - 1);
+	}
+
+	/**
+	 * Bubble up and find a property. If found, perform the function on it.
+	 */
+	bubblePropertyDo {
+		arg key, func, levels = inf;
+		var o = this.bubbleProperty(key, levels);
+		if (o.isKindOf(Nil).not) {
+			var parent = if (o.isKindOf(MdLiObject)) { o.ancestor } { nil };
+			^ func.value(o, this, parent);
+		}
+		^ nil;
 	}
 
 	//

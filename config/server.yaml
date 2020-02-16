@@ -1,0 +1,38 @@
+serverOptions:
+  # Inputs, outputs, and device.
+  # sampleRate: \nil
+  # outputs: \nil
+  # inputs: \nil
+  # inDevice: \nil
+  # inputStreamsEnabled: \nil
+  # outDevice: \nil
+  # outputStreamsEnabled: \nil
+
+  # Memory management.
+  # memSize: \nil
+  # maxNodes: \nil
+  # maxSynthDefs: \nil
+  # numBuffers: \nil
+  # numRGens: \nil
+  # numWireBufs: \nil
+  # memoryLocking: \nil
+
+  # Channels.
+  # numAudioBusChannels: \nil
+  # numControlBusChannels: \nil
+  # numInputBusChannels: \nil
+  # numOutputBusChannels: \nil
+
+  # Paths.
+  # ugenPluginsPath: \nil
+  # restrictedPath: \nil
+
+  # Supernova.
+  # threads: \nil
+  # useSystemClock: \nil
+
+  # Other.
+  # protocol: \nil #udp|tcp
+  # verbosity: \nil #0|-1|-2
+  # threads: \nil #supernova only
+reboot: true
