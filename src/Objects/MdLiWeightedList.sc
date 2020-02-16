@@ -6,7 +6,7 @@ MdLiWeightedList : MdLiObject {
 		arg key, object, weight = nil;
 		if (object.isKindOf(MdLiObject)) {
 			this.attach(key, object);
-			if (weight.isNil.not) {
+			if (weight.exists()) {
 				object.setWeight(weight);
 			};
 		};
@@ -82,7 +82,7 @@ MdLiWeightedList : MdLiObject {
 	 * Returns the cached sorted list. If empty, generates it first.
 	 */
 	sortedKeys {
-		if (sorted.isNil) {
+		if (sorted.empty()) {
 			sorted = this.sort();
 		};
 		^ sorted;
@@ -111,7 +111,7 @@ MdLiWeightedList : MdLiObject {
 		this.sortedKeys().asArray.do {
 			arg key, index;
 			var prop = this.p_getProperty(this.at(key), property);
-			if (prop.isNil.not) {
+			if (prop.exists()) {
 				list.add(prop);
 			};
 		};

@@ -87,4 +87,19 @@ TestMdLiObject : TestMdLi {
 		this.assert(d.includes(\otherId), "OtherId is in selected descendants");
 		this.assert(d.includes(\subsub).not, "Sub-sub is not in selected descendants");
 	}
+
+	test_addresses {
+		this.assertEquals(object[\sub][\subsub].deepId(), "object.sub.subsub", "addresses are generated correctly.");
+	}
+
+	test_circularAddresses {
+		var o1 = MdLiObject().setId(\o1);
+		var o2 = MdLiObject().setId(\o2);
+		o1.attach(\o2, o2);
+		o2.attach(\o1, o1);
+
+		this.assertEquals(o1.deepId(), "o2.o1", "Resolves circular addresses");
+		this.assertEquals(o2.deepId(), "o1.o2", "Resolves circular addresses");
+	}
+
 }

@@ -40,7 +40,7 @@ MdLiConfigBuilder : MdLiObject {
 
 	*convertScalar {
 		arg scalar;
-		if (scalar.isKindOf(Nil)) {
+		if (scalar.isNil()) {
 			^ MdLiNil();
 		};
 		scalar = scalar.asString();
@@ -51,15 +51,5 @@ MdLiConfigBuilder : MdLiObject {
 			^ MdLiNil();
 		}
 		^ scalar.asSymbol;
-	}
-}
-
-MdLiNil {
-	isNil {
-		^ true;
-	}
-
-	asString {
-		^ "\\nil";
 	}
 }

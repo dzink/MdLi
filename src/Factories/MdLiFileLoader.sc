@@ -9,9 +9,9 @@ MdLiFileLoader : MdLiObject {
 	}
 
 	defaultPaths {
-		if (defaultPaths.isNil) {
+		if (defaultPaths.empty()) {
 			defaultPaths = MdLiWeightedList[];
-			if (rootDirectory.isNil.not) {
+			if (rootDirectory.exists()) {
 				defaultPaths.put(rootDirectory, rootDirectory);
 			};
 		};

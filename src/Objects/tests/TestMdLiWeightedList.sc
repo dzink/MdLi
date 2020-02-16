@@ -53,11 +53,11 @@ TestMdLiWeightedList : TestMdLi {
 		var l = list.weightedCollect {
 			arg key, value, index;
 			value.put(\order, index);
-			(value.id() ++ \Meow).asSymbol;
+			(value.id() ++ \Meow);
 		};
-		this.assertEquals(l[0], \aMeow, "A's symbol was altered and collected");
-		this.assertEquals(l[1], \bMeow, "B's symbol was altered and collected");
-		this.assertEquals(l[2], \cMeow, "C's symbol was altered and collected");
+		this.assertSymbolEquals(l[0], \aMeow, "A's symbol was altered and collected");
+		this.assertSymbolEquals(l[1], \bMeow, "B's symbol was altered and collected");
+		this.assertSymbolEquals(l[2], \cMeow, "C's symbol was altered and collected");
 		this.assertEquals(list[\a][\order], 0, "A's object was also altered");
 		this.assertEquals(list[\b][\order], 1, "A's object was also altered");
 		this.assertEquals(list[\c][\order], 2, "A's object was also altered");
@@ -67,11 +67,11 @@ TestMdLiWeightedList : TestMdLi {
 		var l = list.weightedKeysCollect {
 			arg key, value, index;
 			value.put(\order, index);
-			(value.id() ++ \Meow).asSymbol;
+			(value.id() ++ \Meow);
 		};
-		this.assertEquals(l[\a], \aMeow, "A's symbol was altered and collected");
-		this.assertEquals(l[\b], \bMeow, "B's symbol was altered and collected");
-		this.assertEquals(l[\c], \cMeow, "C's symbol was altered and collected");
+		this.assertSymbolEquals(l[\a], \aMeow, "A's symbol was altered and collected");
+		this.assertSymbolEquals(l[\b], \bMeow, "B's symbol was altered and collected");
+		this.assertSymbolEquals(l[\c], \cMeow, "C's symbol was altered and collected");
 	}
 
 	test_weightedGetProperty {

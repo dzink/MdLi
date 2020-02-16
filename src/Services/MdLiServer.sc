@@ -4,11 +4,12 @@ MdLiServer : MdLiService {
 	var options;
 
 	server {
-		if (server.isNil) {
+		if (server.empty()) {
 			server = Server.default;
 		};
 		^ server;
 	}
+
 
 
 

@@ -13,13 +13,14 @@ MdLiConfig : MdLiObject {
 	}
 
 	at {
-		arg key;
-		key = key.asString.split($.);
-		if (key.size == 1) {
-			^ super.at(key[0].asSymbol);
+		arg address;
+		var keys = address.asString.split($.);
+		var key = keys[0].asSymbol;
+		if (keys.size == 1) {
+			^ super.at(key);
 		} {
-			var remainingKey = key.copyRange(1, key.size - 1).join($.);
-			^ this.at(key[0]).at(remainingKey);
+			var remainingKey = keys.copyRange(1, keys.size - 1).join($.);
+			^ this.at(key).at(remainingKey);
 		}
 	}
 
@@ -53,19 +54,19 @@ MdLiConfig : MdLiObject {
 	}
 
 	removeAt {
-	arg key, value;
-	var keys = key.asString.split($.);
+		arg key, value;
+		var keys = key.asString.split($.);
 
-	// It's a single object.
-	if (keys.size == 1) {
-		var value = this.at(key);
-		super.removeAt(key.asSymbol);
+		// It's a single object.
+		if (keys.size == 1) {
+			var value = this.at(key);
+			super.removeAt(key.asSymbol);
 
-	// It's a long concatenated key.
-	} {
-		var remainingKey = keys.copyRange(1, keys.size - 1).join($.);
-		this.at(keys[0]).removeAt(remainingKey);
-	}
+		// It's a long concatenated key.
+		} {
+			var remainingKey = keys.copyRange(1, keys.size - 1).join($.);
+			this.at(keys[0]).removeAt(remainingKey);
+		}
 	}
 
 	easyRead {
@@ -108,5 +109,71 @@ MdLiConfig : MdLiObject {
 		^ keys.asArray().sort();
 	}
 
+	/**
+	 * Gets a list of full-length dot-separated addresses for this and all
+	 * sub-configs.
+	 */
+	addresses {
+		arg levels = inf, prefix = "", existing;
+		var list = List[];
+		var keys = this.keys;
+		existing = existing ?? { List[] };
+		keys.do {
+			arg key, index;
+			var value = this.at(key);
+			var base = prefix ++ key;
+			if (value.isKindOf(MdLiConfig) and: (levels > 0)) {
+
+				// Check for circular reference before adding all levels.
+				if (existing.includes(value).not) {
+					list.addAll(value.addresses(levels - 1, (base ++ ".").asSymbol));
+					existing.add(this);
+				};
+			} {
+				list.add(base.asSymbol);
+			};
+		}
+		^ list;
+	}
+
+	/**
+	 * Imports defaults from another config. They will not overwrite existing
+	 * config.
+	 */
+	importDefaults {
+		arg other;
+		var otherKeys, myAddresses, defaultKeys;
+		otherKeys = other.addresses();
+		myAddresses = this.addresses();
+
+		defaultKeys = otherKeys.select {
+			arg address;
+			this.isAddressOpen(address, myAddresses);
+		};
+
+		defaultKeys.do {
+			arg key;
+			this[key] = other[key];
+		};
+		this.easyRead;
+		^ this;
+
+	}
+
+	/**
+	 * Finds out if an address will overwrite existing config data if set.
+	 */
+	isAddressOpen {
+		arg address, keys;
+		var addresses = address.asString.split($.);
+		addresses.size.do {
+			var testAddress = addresses.join(".").asSymbol();
+			if (keys.includes(testAddress)) {
+				^ false;
+			};
+			addresses.pop();
+		};
+		^ true;
+	}
 
 }

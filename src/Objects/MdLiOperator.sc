@@ -1,0 +1,3 @@
+MdLiOperator : MdLiObject {
+	
+}

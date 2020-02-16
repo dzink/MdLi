@@ -30,7 +30,7 @@ MdLiObject : Dictionary {
 
 	hasKey {
 		arg key;
-		^ this.at(key).isKindOf(Nil).not;
+		^ this.at(key).notNil();
 	}
 
 	/**
@@ -39,7 +39,7 @@ MdLiObject : Dictionary {
 	 */
 	 ancestors {
 	 	arg levels = 1;
-		if (ancestor.isNil.not) {
+		if (ancestor.exists()) {
 			if (levels == 0) {
 				^ this;
 			};
@@ -86,7 +86,7 @@ MdLiObject : Dictionary {
 
 
 	errorHandler {
-		if (errorHandler.isKindOf(Nil)) {
+		if (errorHandler.isNil()) {
 			var func = { MdLiErrorHandler() };
 			errorHandler = this.bubbleDefaultProperty(\errorHandler, func);
 		}
@@ -94,7 +94,7 @@ MdLiObject : Dictionary {
 	}
 
 	logger {
-		if (logger.isNil) {
+		if (logger.empty()) {
 			var func = { MdLiLogger() };
 			logger = this.bubbleDefaultProperty(\logger, func);
 		}
@@ -102,7 +102,7 @@ MdLiObject : Dictionary {
 	}
 
 	config {
-		if (config.isNil) {
+		if (config.empty()) {
 			config = MdLiConfig();
 		}
 		^ config;
@@ -116,7 +116,7 @@ MdLiObject : Dictionary {
 	bubbleDefaultProperty {
 		arg key, func, levels = inf;
 		var bubble = this.bubbleProperty(key, levels);
-		if (bubble.isKindOf(Nil).not) {
+		if (bubble.notNil()) {
 			^ bubble;
 		} {
 			var a = this.ancestors(levels);
@@ -133,7 +133,7 @@ MdLiObject : Dictionary {
 	 */
 	ancestorProperty {
 		arg key, levels = inf;
-		if (ancestor.isNil.not) {
+		if (ancestor.exists()) {
 			if (ancestor.hasKey(key)) {
 				^ ancestor.at(key);
 			};
@@ -163,7 +163,7 @@ MdLiObject : Dictionary {
 	bubblePropertyDo {
 		arg key, func, levels = inf;
 		var o = this.bubbleProperty(key, levels);
-		if (o.isKindOf(Nil).not) {
+		if (o.notNil()) {
 			var parent = if (o.isKindOf(MdLiObject)) { o.ancestor } { nil };
 			^ func.value(o, this, parent);
 		}
@@ -214,10 +214,34 @@ MdLiObject : Dictionary {
 
 	setId {
 		arg a_id;
-		if (id.isNil) {
+		if (id.empty()) {
 			id = a_id;
 		};
 		^ this;
+	}
+	/**
+	 * Gets a long address for this object, which is all its ancestors
+	 * concatenated.
+	 * Uses a list to ensure no circular references.
+	 */
+	deepId {
+		arg list;
+		list = list ?? { List[] };
+		^ if (ancestor.exists()
+				and: {this.endsId().not()
+					and: {list.includes(ancestor).not()}
+				}) {
+			list.add(this);
+			ancestor.deepId(list) ++ ".";
+		} ++ this.id();
+	}
+
+	/**
+	 * Indicate when building deepId's it ends here (in case of circular
+	 * references).
+	 */
+	endsId {
+		^ false;
 	}
 
 }
