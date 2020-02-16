@@ -1,0 +1,18 @@
+(
+  {
+    try {
+      Process.tailCallOptimize = false;
+
+      TestMdLi.reportPasses_(false);
+      TestMdLi.runAll();
+      \meow.postln;
+    } {
+      arg error;
+      "Completed with errors".postln;
+      error.reportError;
+      error.class.postln;
+    };
+    0.1.wait;
+    0.exit;
+  }.fork;
+)

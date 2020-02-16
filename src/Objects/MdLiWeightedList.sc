@@ -4,8 +4,11 @@ MdLiWeightedList : MdLiObject {
 
 	put {
 		arg key, object;
+		if (object.isKindOf(MdLiObject)) {
+			this.attach(key, object);
+		};
 		this.invalidateSort();
-		^ parent.put(key, object);
+		^ super.put(key, object);
 	}
 
 	invalidateSort {
@@ -15,59 +18,23 @@ MdLiWeightedList : MdLiObject {
 
 	sort {
 		arg property;
-		var keys = this.keys;
+		var keys = super.keys;
 		property = property ?? sortProperty;
 		keys = keys.asArray.sortMap {
 			arg key;
 			var weight = this.p_getWeight(this[key], property).asFloat;
 			weight;
 		};
+		keys.select {
+			arg key;
+			this[key].isKindOf(Dictionary);
+		};
 		^ keys;
 	}
 
-	/**
-	 * Performs a function for each member of the list in order.
-	 * @return MdLiWeightedList
-	 *   A list with the results of the function.
-	 */
-	do {
-		arg func;
-		var list = MdLiWeightedList();
-		this.sorted(sortProperty).asArray.do {
-			arg key, index;
-			list[key] = func.value(this.at(key), index);
-		};
-		^ list;
-	}
-
-	/**
-	 * Performs a function for each member of the list in order.
-	 * @return MdLiWeightedList
-	 *   A list with the results of the function.
-	 */
-	keysValuesDo {
-		arg func;
-		var list = MdLiWeightedList();
-		this.sorted(sortProperty).asArray.do {
-			arg key, index;
-			list[key] = func.value(key, this.at(key), index);
-		};
-		^ list;
-	}
-
-	/**
-	 * Performs a function for each member of the list in order.
-	 * @return MdLiWeightedList
-	 *   A list with the results of the function.
-	 */
-	keysDo {
-		arg func;
-		var list = MdLiWeightedList();
-		this.sorted(sortProperty).asArray.do {
-			arg key, index;
-			list[key] = func.value(key, index);
-		};
-		^ list;
+	doWeighted {
+		arg property;
+		property = sortProperty;
 	}
 
 	asArray {
@@ -75,18 +42,21 @@ MdLiWeightedList : MdLiObject {
 	}
 
 	asList {
-		var list = List();
-		this.sorted(sortProperty).asArray.do {
+		var list = List[];
+		this.sortedKeys(sortProperty).asArray.do {
 			arg key, index;
 			list.add(this.at(key));
 		};
 		^ list;
 	}
 
+	keys {
+		^ this.sortedKeys;
+	}
 	/**
 	 * Returns the cached sorted list. If empty, generates it first.
 	 */
-	sorted {
+	sortedKeys {
 		if (sorted.isNil) {
 			sorted = this.sort();
 		};
@@ -105,10 +75,8 @@ MdLiWeightedList : MdLiObject {
 			if (object.isKindOf(Dictionary)) {
 				^ (object[property] ?? 0).asFloat;
 			} {
-				^	0;
+				^	false;
 			};
 		};
 	}
-
-
 }

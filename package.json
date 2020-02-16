@@ -4,12 +4,21 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+  },
+  "devDependencies": {
     "nodemon": "^2.0.2"
   },
-  "devDependencies": {},
   "scripts": {
-    "test": "nodemon \"sclang test.sc\""
+    "test": "nodemon"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "nodemonConfig": {
+    "watch": "src",
+    "exec": "sclang  -D src/tests/test.sc.nocompile",
+    "ext": "sc",
+    "ignore": [
+      ".git/*"
+    ]
+  }
 }
