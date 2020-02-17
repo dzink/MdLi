@@ -17,6 +17,48 @@ TestMdLiObject : TestMdLi {
 		this.assertEquals(object[\sub2].id(), \otherId, "Id can be customized");
 	}
 
+	test_descendants_basic {
+		this.assert(object.descendants.includes(object[\sub]), "Object's descendants includes sub.");
+		this.assert(object.descendants.includes(object[\sub][\subsub]), "Object's descendants includes subsub.");
+		this.assert(object.descendants.includes(object[\sub2]), "Object's descendants includes sub2.");
+		this.assert(object.descendants.includes(object).not, "Object's descendants do not include object.");
+	}
+
+	test_descendantsSelect {
+		var d;
+		object[\sub2].attach(\subsub, MdLiObject());
+		d = object.descendantsSelect({
+			arg o;
+			o.id() == \sub or: { o.id() == \subsub};
+		});
+		this.assert(d.includes(object[\sub]), "Select finds sub and continues.");
+		this.assert(d.includes(object[\sub][\subsub]), "Select finds subsub");
+		this.assert(d.includes(object[\sub2]).not, "Select does not find sub2, and stops.");
+		this.assert(d.includes(object[\sub2][\subsub]).not, "Select does not find sub2's child.");
+	}
+
+	test_descendantsOfKind {
+		var d;
+		object[\sub2].attach(\subsub, MdLiServer());
+		d = object.descendantsOfKind(MdLiServer);
+		this.assert(d.includes(object[\sub2][\subsub]), "Select finds the MdLiServer.");
+		this.assertEquals(d.size, 1, "Select only found the MdLiServer");
+	}
+
+	test_descendantsSelectFromAll {
+		var d;
+		object[\sub2].attach(\subsub, MdLiObject());
+		d = object.descendantsSelectFromAll({
+			arg o;
+			o.id() == \subsub;
+		});
+		this.assert(d.includes(object[\sub]).not, "Select does not match sub.");
+		this.assert(d.includes(object[\sub][\subsub]), "Select finds sub's child subsub");
+		this.assert(d.includes(object[\sub2]).not, "Select does not match sub2.");
+		this.assert(d.includes(object[\sub2][\subsub]), "Select finds sub2's child subsub");
+
+	}
+
 	test_ancestors_basic {
 		this.assert(object[\sub].ancestor === object, "Object is first ancestor to sub");
 		this.assert(object[\sub2].ancestor === object, "Object is first ancestor to sub2");
@@ -41,11 +83,9 @@ TestMdLiObject : TestMdLi {
 		var a;
 		a = object[\sub][\subsub].firstAncestorWhere({
 			arg o;
-			[\id, o.id].postln;
 			o.id == \object;
 		});
 		this.assert(a === object, "Object is the first selected ancestor.");
-		a.postln;
 		a = object[\sub][\subsub].firstAncestorWhere({
 			arg o;
 			o.id == \sub;
@@ -54,25 +94,22 @@ TestMdLiObject : TestMdLi {
 	}
 
 	test_bubbleProperty {
-		// object[\p1] = \p1;
-		// this.assertEquals(object[\sub][\subsub].bubbleProperty(\p1), \p1, "Properties bubble down to descendents.");
+		object[\p1] = \p1;
+		this.assertEquals(object[\sub][\subsub].bubbleProperty(\p1), \p1, "Bubble up finds the property.");
 	}
 
-	test_bubblePropertyDo {
-		// var obj, self, ancestor, result;
-		// var p = MdLiObject[];
-		// object.attach(\p, p);
-		// result = object[\sub][\subsub].bubblePropertyDo(\p, {
-		// 	arg o, t, a;
-		// 	obj = o;
-		// 	self = t;
-		// 	ancestor = a;
-		// 	120
-		// });
-		// this.assertEquals(obj.id(), \p, "bubblePropertyDo gets the object.");
-		// this.assertEquals(self.id(), \subsub, "bubblePropertyDo gets this.");
-		// this.assertEquals(ancestor.id(), \object, "bubblePropertyDo gets ancestor.");
-		// this.assertEquals(result, 120, "bubblePropertyDo gets the correct result.");
+	test_bubbleDefaultProperty {
+		object[\p1] = \p1;
+		this.assertEquals(object[\sub][\subsub].bubbleDefaultProperty(\p1), \p1, "Bubble up finds the property.");
+		this.assertEquals(object[\sub][\subsub].bubbleDefaultProperty(\p2, { \bloop }), \bloop, "Bubble up sets the property.");
+		this.assertEquals(object[\p2], \bloop, "The property is now set on the oldest object.");
+		this.assertEquals(object[\sub][\subsub][\p2], \bloop, "The property is now set on the dscendant object as well.");
+	}
+
+	test_oldestBubbleUp {
+		this.assert(object.oldestBubbleUp() === object, "Self bubble up works.");
+		this.assert(object[\sub].oldestBubbleUp() === object, "Single level bubble up works.");
+		this.assert(object[\sub][\subsub].oldestBubbleUp() === object, "Multi level bubble up works.");
 	}
 
 	test_errorHandler {
@@ -81,8 +118,8 @@ TestMdLiObject : TestMdLi {
 	}
 
 	test_logger {
-		// this.assert(object[\sub][\subsub].logger().isKindOf(MdLiLogger), "Logger is automatically built.");
-		// this.assert(object[\sub][\subsub].logger() === object.logger(), "Descendants share a logger with object.");
+		this.assert(object[\sub][\subsub].logger().isKindOf(MdLiLogger), "Logger is automatically built.");
+		this.assert(object[\sub][\subsub].logger() === object.logger(), "Descendants share a logger with object.");
 	}
 
 	test_descendants {

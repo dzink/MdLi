@@ -27,10 +27,13 @@ MdLiAbstractRelativeFinder {
 	 * at its children.
 	 */
 	selectBlocking {
-		arg select, continue, levels = inf;
+		arg select, continue, levels = inf;		
+		^ this.prRelatives(object, levels, select: select, continue: continue, list: List[]);
+	}
 
-		// If continue is empty, use this function which will just use selected.
-		continue = continue ?? {{
+	selectAndContinue {
+		arg select, levels = inf;
+		var continue = continue ?? {{
 			arg child, selected;
 			selected;
 		}};

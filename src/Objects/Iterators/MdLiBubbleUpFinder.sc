@@ -1,3 +1,7 @@
+/**
+ * The BubbleUpFinder is like the ancestor finder, only it will also include the original object.
+ */
+
 MdLiBubbleUpFinder : MdLiAncestorFinder {
 
 	/**

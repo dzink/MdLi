@@ -68,7 +68,7 @@ MdLiObject : Dictionary {
 
 	descendantsSelect {
 		arg select, levels = inf;
-		^ this.descendantFinder().select(select, levels);
+		^ this.descendantFinder().selectAndContinue(select, levels);
 	}
 
 	descendantsSelectFromAll {
@@ -152,15 +152,15 @@ MdLiObject : Dictionary {
 	bubbleDefaultProperty {
 		arg key, func, levels = inf;
 		var value = this.bubbleProperty(key, levels);
-		// if (value.exists()) {
-		// 	^ value;
-		// } {
-			var a = this.oldestBubbleUp(levels);
-			// value = func.value(this, a);
-			// a.attach(key, value);
-			// this.attach(key, value);
+		if (value.exists()) {
 			^ value;
-		// };
+		} {
+			var a = this.oldestBubbleUp(levels);
+			value = func.value(this, a);
+			a.attach(key, value);
+			this.attach(key, value);
+			^ value;
+		};
 
 	}
 
@@ -168,11 +168,11 @@ MdLiObject : Dictionary {
 	 * Gets (or creates) a logger.
 	 */
 	logger {
-		// if (logger.empty()) {
-		// 	var func = { MdLiLogger() };
-		// 	logger = this.bubbleDefaultProperty(\logger, func);
-		// }
-		// ^ logger;
+		if (logger.empty()) {
+			var func = { MdLiLogger() };
+			logger = this.bubbleDefaultProperty(\logger, func);
+		}
+		^ logger;
 	}
 
 	config {
