@@ -80,7 +80,7 @@ TestMdLiObject : TestMdLi {
 		this.assert(d.includes(\otherId), "OtherId is in descendants");
 		this.assert(d.includes(\subsub), "Sub-sub is in descendants");
 
-		d = object.descendants(select: {
+		d = object.descendantsSelect({
 			arg d; d.id() != \sub;
 		}).collect { arg c; c.id() };
 		this.assert(d.includes(\sub).not, "Sub is not in selected descendants");

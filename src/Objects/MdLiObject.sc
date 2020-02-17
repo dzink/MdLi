@@ -70,18 +70,32 @@ MdLiObject : Dictionary {
 		^ this;
 	}
 
+	/**
+	 * Get a descendants iterator for this.
+	 */
+	findDescendants {
+		^ MdLiDescendantFinder(this);
+	}
+
 	descendants {
-		arg levels = inf, select = nil, previous = nil;
-		var descendants = previous ?? List[];
-		select = select ?? true;
-		this.do {
-			arg child;
-			if (child.isKindOf(MdLiObject) and: select.value(child)) {
-				descendants.add(child);
-				descendants.addAll(child.descendants(levels - 1, select, previous));
-			};
-		};
-		^ descendants;
+		arg levels = inf;
+		^ this.findDescendants().all(levels);
+	}
+
+	descendantsSelect {
+		arg select, levels = inf;
+		^ this.findDescendants().select(select, levels);
+	}
+
+
+	/**
+	 * Find descendants that are of a certain class type (or subclass of that).
+	 */
+	descendantsOfKind {
+		arg kind, levels;
+		^ this.descendants(levels, {
+			arg d; d.isKindOf(kind);
+		});
 	}
 
 
@@ -242,6 +256,11 @@ MdLiObject : Dictionary {
 	 */
 	endsId {
 		^ false;
+	}
+
+	post {
+		arg message, level = 0, type, object;
+		this.logger().post(\message, level, type, object);
 	}
 
 }
