@@ -56,7 +56,6 @@ TestMdLiObject : TestMdLi {
 		this.assert(d.includes(object[\sub][\subsub]), "Select finds sub's child subsub");
 		this.assert(d.includes(object[\sub2]).not, "Select does not match sub2.");
 		this.assert(d.includes(object[\sub2][\subsub]), "Select finds sub2's child subsub");
-
 	}
 
 	test_ancestors_basic {
@@ -112,9 +111,10 @@ TestMdLiObject : TestMdLi {
 		this.assert(object[\sub][\subsub].oldestBubbleUp() === object, "Multi level bubble up works.");
 	}
 
-	test_errorHandler {
-		// this.assert(object[\sub][\subsub].errorHandler().isKindOf(MdLiErrorHandler), "Error Handler is automatically built.");
-		// this.assert(object[\sub][\subsub].errorHandler() === object.errorHandler(), "Descendants share an errorHandler with object.");
+	test_isDescendantOf {
+		this.assert(object[\sub].isDescendantOf(object), "Sub is a descendant of object.");
+		this.assert(object[\sub][\subsub].isDescendantOf(object), "Subsub is a descendant of object.");
+		this.assert(object[\sub2].isDescendantOf(object[\sub]).not, "Sub2 is not a descendant of Sub.");
 	}
 
 	test_logger {
@@ -122,26 +122,11 @@ TestMdLiObject : TestMdLi {
 		this.assert(object[\sub][\subsub].logger() === object.logger(), "Descendants share a logger with object.");
 	}
 
-	test_descendants {
-		// var d;
-		// d = object.descendants().collect { arg c; c.id() };
-		// this.assert(d.includes(\sub), "Sub is in descendants");
-		// this.assert(d.includes(\otherId), "OtherId is in descendants");
-		// this.assert(d.includes(\subsub), "Sub-sub is in descendants");
-		//
-		// d = object.descendantsSelect({
-		// 	arg d; d.id() != \sub;
-		// }).collect { arg c; c.id() };
-		// this.assert(d.includes(\sub).not, "Sub is not in selected descendants");
-		// this.assert(d.includes(\otherId), "OtherId is in selected descendants");
-		// this.assert(d.includes(\subsub).not, "Sub-sub is not in selected descendants");
-	}
-
 	test_addresses {
 		this.assertEquals(object[\sub][\subsub].deepId(), "object.sub.subsub", "addresses are generated correctly.");
 	}
 
-	test_circularAddresses {
+	test_circular {
 		var o1 = MdLiObject().setId(\o1);
 		var o2 = MdLiObject().setId(\o2);
 		o1.attach(\o2, o2);
@@ -149,6 +134,9 @@ TestMdLiObject : TestMdLi {
 
 		this.assertEquals(o1.deepId(), "o2.o1", "Resolves circular addresses");
 		this.assertEquals(o2.deepId(), "o1.o2", "Resolves circular addresses");
+		this.assertEquals(o2.ancestors().size, 1, "Only 1 ancestor");
+		this.assertEquals(o2.descendants().size, 1, "Only 1 descendant");
+		this.assert(o2.oldestBubbleUp() == o1, "o1 is o2's oldest Bubble up");
 	}
 
 }

@@ -6,9 +6,9 @@ MdLiLogger : MdLiService {
 
 	post {
 		arg message, level = 0, type, object;
-		if (level >= minLevel) {
+		if (this.willPost(level)) {
 			this.stdout(message, level, type);
-			this.disk(message, level, type);
+			// this.disk(message, level, type);
 		};
 		^ this;
 	}
@@ -16,16 +16,15 @@ MdLiLogger : MdLiService {
 	stdout {
 		arg message, level = 0, type = \status, object;
 		message = this.prepend(message, type, object);
-		if (stdout.asSymbol) {
-			switch (type)
-				{\warn} { message.warn }
-				{ message.postln };
-		};
+
+		switch (type.asSymbol)
+			{\warn} { message.warn }
+			{ message.postln };
 		^ this;
 	}
 
 	disk {
-		arg message, level = 0;
+		arg message, level = 0, type = \status, object;
 
 		// @TODO
 	}
@@ -37,5 +36,10 @@ MdLiLogger : MdLiService {
 			{ \warn } { ""}
 			{ "STATUS: " };
 		^ prepend ++ message;
+	}
+
+	willPost {
+		arg level;
+		^ level >= minLevel;
 	}
 }

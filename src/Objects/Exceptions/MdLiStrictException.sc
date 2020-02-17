@@ -14,14 +14,13 @@ MdLiStrictException : MethodError {
 
 	throw {
 		if (level >= strictness) {
-			super.throw();
-			thisThread.handleError(this);
+			^ super.throw();
 		} {
 			if (receiver.respondsTo(\logger)) {
 				receiver.logger.post(what, level, \warn, this);
 			};
 		};
-		^ this;
+		^ nil;
 	}
 
 }

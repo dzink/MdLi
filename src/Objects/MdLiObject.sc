@@ -86,6 +86,19 @@ MdLiObject : Dictionary {
 		}, levels);
 	}
 
+	isDescendantOf {
+		arg object, levels = inf;
+		^ this.firstAncestorWhere({
+			arg o;
+			o === object;
+		}, levels).exists();
+	}
+
+	isAncestorOf {
+		arg object, levels = inf;
+		^ object.isDescendantOf(this);
+	}
+
 	ancestorFinder {
 		^ MdLiAncestorFinder(this);
 	}

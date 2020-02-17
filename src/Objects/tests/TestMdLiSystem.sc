@@ -10,5 +10,4 @@ TestMdLiSystem {
 		this.assertSymbolEquals(s.deepId, "system");
 		this.assertSymbolEquals(o.deepId, "system.object");
 	}
-
 }
