@@ -1,10 +1,9 @@
 MdLiObject : Dictionary {
 	classvar <> strict = true;
 
-	var < ancestor;
+	var ancestor;
 	var id;
 
-	var errorHandler;
 	var logger;
 	var config;
 
@@ -33,28 +32,13 @@ MdLiObject : Dictionary {
 		^ this.at(key).notNil();
 	}
 
-	/**
-	 * Finds single ancestor at a given level. If levels don't go that high, find
-	 * highest ancestor
-	 */
-	 ancestors {
-	 	arg levels = 1;
-		if (ancestor.exists()) {
-			if (levels == 0) {
-				^ this;
-			};
-			^ ancestor.ancestors(levels - 1);
-		};
-		^ this;
-	 }
-
 	attach {
 		arg key, object;
 		if (object.isKindOf(MdLiObject)) {
 			object.setId(key);
 			object.setAncestor(this);
 		} {
-			this.errorHandler.throw("Tried to attach a non-MdLiObject.")
+			MdLiStrictException.throw("Tried to attach a non-MdLiObject.", 50);
 		};
 		super.put(key, object);
 		^ this;
@@ -65,7 +49,7 @@ MdLiObject : Dictionary {
 		if (a_ancestor.isKindOf(MdLiObject)) {
 			ancestor = a_ancestor;
 		} {
-			this.errorHandler.throw("Tried to make a non-MdLiObject a ancestor.")
+			MdLiStrictException.throw("Tried to attach a non-MdLiObject.", 50);
 		};
 		^ this;
 	}
@@ -73,55 +57,93 @@ MdLiObject : Dictionary {
 	/**
 	 * Get a descendants iterator for this.
 	 */
-	findDescendants {
+	descendantFinder {
 		^ MdLiDescendantFinder(this);
 	}
 
 	descendants {
 		arg levels = inf;
-		^ this.findDescendants().all(levels);
+		^ this.descendantFinder().all(levels);
 	}
 
 	descendantsSelect {
 		arg select, levels = inf;
-		^ this.findDescendants().select(select, levels);
+		^ this.descendantFinder().select(select, levels);
 	}
 
+	descendantsSelectFromAll {
+		arg select, levels = inf;
+		^ this.descendantFinder().selectFromAll(select, levels);
+	}
 
 	/**
 	 * Find descendants that are of a certain class type (or subclass of that).
 	 */
 	descendantsOfKind {
-		arg kind, levels;
-		^ this.descendants(levels, {
+		arg kind, levels = inf;
+		^ this.descendantsSelectFromAll({
 			arg d; d.isKindOf(kind);
-		});
+		}, levels);
 	}
 
-
-	errorHandler {
-		if (errorHandler.isNil()) {
-			var func = { MdLiErrorHandler() };
-			errorHandler = this.bubbleDefaultProperty(\errorHandler, func);
-		}
-		^ errorHandler;
+	ancestorFinder {
+		^ MdLiAncestorFinder(this);
 	}
 
-	logger {
-		if (logger.empty()) {
-			var func = { MdLiLogger() };
-			logger = this.bubbleDefaultProperty(\logger, func);
-		}
-		^ logger;
+	ancestors {
+		arg levels = inf;
+		^ this.ancestorFinder().all(levels);
 	}
 
-	config {
-		if (config.empty()) {
-			config = MdLiConfig();
-		}
-		^ config;
+	ancestor {
+		^ ancestor;
 	}
 
+	ancestorSelect {
+		arg select, levels = inf;
+		^ this.ancestorFinder().selectFromAll(select, levels);
+	}
+
+	ancestorAt {
+		arg level = 0;
+		^ this.ancestorFinder().at(level);
+	}
+
+	oldestAncestor {
+		arg levels = inf;
+ 		^ this.ancestorFinder().oldest(levels);
+	}
+
+	firstAncestorWhere {
+		arg select = true, levels = inf;
+		^ this.ancestorFinder().firstWhere(select, levels);
+	}
+
+	bubbleUpFinder {
+		^ MdLiBubbleUpFinder(this);
+	}
+
+	oldestBubbleUp {
+		arg levels = inf;
+		^ this.bubbleUpFinder().oldest(levels);
+	}
+
+	bubbleUpFirstWithProperty {
+		arg key, levels = inf;
+		^ this.bubbleUpFinder().firstWhere({
+			arg o;
+			o.hasKey(key);
+		}, levels);
+	}
+
+	bubbleProperty {
+		arg key, levels = inf;
+		var object = this.bubbleUpFirstWithProperty(key, levels);
+		if (object.notNil()) {
+			^ object.at(key);
+		};
+		^ nil;
+	}
 
 	/**
 	 * Searches for a property as in bubbleProperty. If none is found, evals the
@@ -129,67 +151,35 @@ MdLiObject : Dictionary {
 	 */
 	bubbleDefaultProperty {
 		arg key, func, levels = inf;
-		var bubble = this.bubbleProperty(key, levels);
-		if (bubble.notNil()) {
-			^ bubble;
-		} {
-			var a = this.ancestors(levels);
-			var object = func.value(this, a);
-			a.attach(key, object);
-			this.attach(key, object);
-			^ object;
-		};
-	}
+		var value = this.bubbleProperty(key, levels);
+		// if (value.exists()) {
+		// 	^ value;
+		// } {
+			var a = this.oldestBubbleUp(levels);
+			// value = func.value(this, a);
+			// a.attach(key, value);
+			// this.attach(key, value);
+			^ value;
+		// };
 
-
-	/**
-	 * Finds among ancestors a given key.
-	 */
-	ancestorProperty {
-		arg key, levels = inf;
-		if (ancestor.exists()) {
-			if (ancestor.hasKey(key)) {
-				^ ancestor.at(key);
-			};
-			if (levels == 0) {
-				^ nil;
-			};
-			^ ancestor.ancestorProperty(key, levels - 1);
-		};
-		^ nil;
-	}
-
-
-	/**
-	 * Bubbles up through ancestors to find a given key.
-	 */
-	bubbleProperty {
-		arg key, levels = inf;
-		if (this.hasKey(key)) {
-			^ this.at(key);
-		};
-		^ this.ancestorProperty(key, levels - 1);
 	}
 
 	/**
-	 * Bubble up and find a property. If found, perform the function on it.
+	 * Gets (or creates) a logger.
 	 */
-	bubblePropertyDo {
-		arg key, func, levels = inf;
-		var o = this.bubbleProperty(key, levels);
-		if (o.notNil()) {
-			var parent = if (o.isKindOf(MdLiObject)) { o.ancestor } { nil };
-			^ func.value(o, this, parent);
+	logger {
+		// if (logger.empty()) {
+		// 	var func = { MdLiLogger() };
+		// 	logger = this.bubbleDefaultProperty(\logger, func);
+		// }
+		// ^ logger;
+	}
+
+	config {
+		if (config.empty()) {
+			config = MdLiConfig();
 		}
-		^ nil;
-	}
-
-	//
-	setAncestorProperty {
-		arg key, object, levels = inf;
-		var a = this.ancestors(levels);
-		a[key] = object;
-		^ this;
+		^ config;
 	}
 
 
@@ -208,20 +198,6 @@ MdLiObject : Dictionary {
 
 
 
-	// childrenKeys {
-	// 	^ [];
-	// }
-	//
-	// children {
-	// 	arg levels = inf;
-	// 	var children = MdLiWeightedList();
-	// 	this.childrenKeys.do {
-	// 		arg key;
-	// 		var list = this.at(key);
-	// 	};
-	//
-	// }
-
 	id {
 		^ id;
 	}
@@ -233,6 +209,7 @@ MdLiObject : Dictionary {
 		};
 		^ this;
 	}
+
 	/**
 	 * Gets a long address for this object, which is all its ancestors
 	 * concatenated.
